@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FENN Heels Store - Marketplace</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --pink-bg: #fff0f3;
+      --pink-banner: #ffb3c1;
+      --pink-card-bg: #ffffff;
+      --pink-img-box: #ffe5ec;
+      --pink-primary: #ff8fa3;
+      --pink-accent: #ff4d6d;
+      --pink-badge-price: #ffccd5;
+      --text-dark: #590d22;
+    }
+
+    body {
+      background-color: var(--pink-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-dark);
+    }
+
+    /* Form Login Styling */
+    .login-container {
+      max-width: 400px;
+      margin: 80px auto;
+      background: #ffffff;
+      padding: 35px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(255, 77, 109, 0.15);
+    }
+
+    /* Top Navbar */
+    .navbar {
+      background-color: #ffffff !important;
+      border-bottom: 1px solid #ffe5ec;
+      padding: 12px 0;
+    }
+    .navbar-brand {
+      color: var(--pink-accent) !important;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, #ffccd5 0%, #ffb3c1 100%);
+      border-radius: 20px;
+      padding: 35px 40px;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(255, 143, 163, 0.2);
+    }
+    .hero-banner h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .hero-banner p {
+      color: #ffffff;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    /* Section Title */
+    .section-title {
+      color: var(--pink-accent);
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 25px;
+    }
+
+    /* Card Product */
+    .card-product {
+      border: none;
+      border-radius: 18px;
+      background: var(--pink-card-bg);
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(255, 143, 163, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-product:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.2);
+    }
+
+    /* Image Box */
+    .img-box {
+      background-color: var(--pink-img-box);
+      border-radius: 14px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    /* Badges */
+    .badge-category {
+      background-color: var(--pink-accent) !important;
+      font-weight: 600;
+      font-size: 0.65rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .badge-stock {
+      background-color: #6c757d;
+      font-weight: 600;
+      font-size: 0.65rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .badge-price {
+      background-color: var(--pink-badge-price);
+      color: var(--pink-accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .badge-pink-soft {
+      background-color: var(--pink-badge-price);
+      color: var(--text-dark);
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn-pink {
+      background-color: var(--pink-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .btn-pink:hover {
+      background-color: var(--pink-accent);
+      color: #ffffff;
+    }
+    .btn-add-cart {
+      background-color: var(--pink-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      width: 100%;
+      padding: 8px 0;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background-color 0.2s ease;
+    }
+    .btn-add-cart:hover {
+      background-color: var(--pink-accent);
+      color: #ffffff;
+    }
+
+    /* Header Modal Pink */
+    .modal-header-pink {
+      background-color: var(--pink-accent);
+      color: #ffffff;
+      border-radius: 20px 20px 0 0;
+    }
+
+    /* Mode Cetak / Print Struk */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableReceiptArea, #printableReceiptArea * {
+        visibility: visible;
+      }
+      #printableReceiptArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== 1. FORM LOGIN ==================== -->
+  <div id="loginSection" class="container">
+    <div class="login-container">
+      <div class="text-center mb-4">
+        <i class="fa-solid fa-shoe-prints fa-3x" style="color: var(--pink-accent);"></i>
+        <h3 class="fw-bold mt-2" style="color: var(--pink-accent);">Login Pengguna</h3>
+        <p class="text-muted small">FENN Heels Store</p>
+      </div>
+
+      <div id="loginAlert" class="alert alert-danger d-none" role="alert"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="mb-3">
+          <label for="username" class="form-label fw-bold">Email atau Username</label>
+          <input type="text" id="username" class="form-control" placeholder="Masukkan email / username">
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label fw-bold">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-pink w-100 py-2 mt-2">
+          <i class="fa-solid fa-right-to-bracket me-1"></i> Masuk
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== 2. KATALOG PRODUK & NAVBAR ==================== -->
+  <div id="mainAppSection" class="d-none">
+    <nav class="navbar navbar-expand-lg sticky-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <i class="fa-solid fa-shoe-prints me-2"></i>FENN Heels Store
+        </a>
+        <div class="d-flex align-items-center gap-2">
+          <span id="userGreeting" class="fw-bold me-2 text-secondary" style="font-size: 0.9rem;"></span>
+          
+          <!-- Tombol Panel Admin -->
+          <button class="btn btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#adminOrdersModal" onclick="fetchAdminOrders()" style="padding: 6px 14px; font-size: 0.85rem;">
+            <i class="fa-solid fa-user-shield me-1"></i> Panel Admin
+          </button>
+
+          <!-- Tombol Keranjang -->
+          <button class="btn btn-pink position-relative me-2" type="button" data-bs-toggle="modal" data-bs-target="#cartModal" style="padding: 6px 14px; font-size: 0.85rem;">
+            <i class="fa-solid fa-cart-shopping me-1"></i> Keranjang
+            <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">0</span>
+          </button>
+          
+          <button class="btn btn-outline-danger btn-sm" onclick="handleLogout()" title="Keluar">
+            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="hero-banner">
+        <h1>Temukan Heels Impianmu! ✨</h1>
+        <p class="mb-0">Koleksi High Heels Elegan, Nyaman, dan Trendy.</p>
+      </div>
+
+      <div class="section-title">
+        <i class="fa-solid fa-gem me-2"></i>Katalog Produk Utama
+      </div>
+
+      <div class="row g-4 pb-5" id="productList">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-danger" role="status"></div>
+          <p class="mt-2 text-muted">Memuat data heels...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. MODAL KERANJANG BELANJA ==================== -->
+  <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 20px; border: none;">
+        <div class="modal-header" style="background-color: var(--pink-img-box); border-radius: 20px 20px 0 0;">
+          <h5 class="modal-title fw-bold" style="color: var(--pink-accent);">
+            <i class="fa-solid fa-cart-shopping me-2"></i>Keranjang Belanja & Checkout
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="cartValidationAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+            <span id="cartAlertMessage"></span>
+            <button type="button" class="btn-close" onclick="hideCartAlert()"></button>
+          </div>
+
+          <div class="table-responsive mb-3">
+            <table class="table align-middle">
+              <thead>
+                <tr class="text-secondary small">
+                  <th>Produk</th>
+                  <th>Harga</th>
+                  <th style="width: 140px;">Jumlah</th>
+                  <th>Subtotal</th>
+                  <th class="text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="cartTableBody"></tbody>
+            </table>
+          </div>
+
+          <div id="emptyCartMsg" class="text-center py-4 d-none">
+            <i class="fa-solid fa-basket-shopping fa-3x mb-3 text-muted" style="opacity: 0.5;"></i>
+            <p class="text-muted fw-bold">Keranjang belanja kamu masih kosong.</p>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center my-3 pt-2 border-top">
+            <span class="fs-5 fw-bold text-secondary">Total Harga:</span>
+            <span id="cartTotalPrice" class="fs-4 fw-bold" style="color: var(--pink-accent);">Rp 0</span>
+          </div>
+
+          <div id="shippingFormSection" class="card p-3 mt-3 bg-light border-0 rounded-3">
+            <h6 class="fw-bold mb-3" style="color: var(--pink-accent);">
+              <i class="fa-solid fa-truck-fast me-2"></i>Data Pengiriman & Pembayaran
+            </h6>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Nama Penerima <span class="text-danger">*</span></label>
+                <input type="text" id="recipientName" class="form-control form-control-sm" placeholder="Contoh: Alifah">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Nomor Telepon <span class="text-danger">*</span></label>
+                <input type="text" id="recipientPhone" class="form-control form-control-sm" placeholder="Contoh: 082354658920">
+              </div>
+              <div class="col-12 mt-2">
+                <label class="form-label small fw-bold">Alamat Pengiriman Lengkap <span class="text-danger">*</span></label>
+                <textarea id="recipientAddress" class="form-control form-control-sm" rows="2" placeholder="Jl. Alauddin No 90"></textarea>
+              </div>
+              
+              <div class="col-12 mt-2">
+                <label class="form-label small fw-bold">Metode Pembayaran <span class="text-danger">*</span></label>
+                <select id="paymentMethod" class="form-select form-select-sm">
+                  <option value="Cash / Tunai" selected>Cash / Tunai</option>
+                  <option value="Transfer Bank">Transfer Bank</option>
+                  <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top: none;">
+          <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Lanjut Belanja</button>
+          <button type="button" class="btn btn-pink px-4 py-2" onclick="handleCheckout()">
+            <i class="fa-solid fa-bag-shopping me-1"></i> Buat Pesanan (Checkout)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 4. MODAL STRUK PINK & PRINT ==================== -->
+  <div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 20px; border: none;">
+        <div class="modal-header modal-header-pink">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-check me-2"></i>Pesanan Berhasil Dibuat!</h5>
+          <button type="button" class="btn-close btn-close-white no-print" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <div class="modal-body p-4" id="printableReceiptArea">
+          <div id="orderSuccessDetails"></div>
+        </div>
+
+        <div class="modal-footer d-flex justify-content-between no-print" style="border-top: 1px solid #ffe5ec;">
+          <button type="button" class="btn btn-outline-danger rounded-3" onclick="printReceipt()">
+            <i class="fa-solid fa-print me-1"></i> Print Struk
+          </button>
+          <button type="button" class="btn btn-pink px-4" data-bs-dismiss="modal">Selesai & Belanja Lagi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 5. MODAL PANEL ADMIN ==================== -->
+  <div class="modal fade" id="adminOrdersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 15px;">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Panel Admin - Kelola Status Pesanan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="adminAlert" class="alert d-none fw-bold"></div>
+          
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>ID Order</th>
+                  <th>Penerima & Alamat</th>
+                  <th>Tanggal</th>
+                  <th>Total Harga</th>
+                  <th>Status Saat Ini</th>
+                  <th class="text-center">Aksi Perubahan Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTableBody">
+                <!-- Data Pesanan Muncul Di Sini -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let productsData = [];
+    let cart = []; 
+
+    const localImages = [
+      '/images/classic-nude.jpg',
+      '/images/crystal-white.jpg',
+      '/images/diamond-strap.jpg',
+      '/images/golden-accent.jpg',
+      '/images/ivory-pointed.jpg',
+      '/images/mocha-slingback.jpg',
+      '/images/ribbon-luxe.jpg'
+    ];
+
+    window.onload = function() {
+      const user = localStorage.getItem('isLoggedIn');
+      if (user) showMainApp(user);
+    };
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const alertBox = document.getElementById('loginAlert');
+
+      if (!username || !password) {
+        alertBox.innerText = '⚠️ Field kosong! Username dan Password wajib diisi.';
+        alertBox.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alertBox.classList.add('d-none');
+          localStorage.setItem('isLoggedIn', result.data.username);
+          showMainApp(result.data.username);
+        } else {
+          alertBox.innerText = '❌ ' + result.message;
+          alertBox.classList.remove('d-none');
+        }
+      } catch (err) {
+        alertBox.innerText = '❌ Gagal terhubung ke server backend.';
+        alertBox.classList.remove('d-none');
+      }
+    }
+
+    function showMainApp(username) {
+      document.getElementById('loginSection').classList.add('d-none');
+      document.getElementById('mainAppSection').classList.remove('d-none');
+      document.getElementById('userGreeting').innerText = 'Halo, ' + username;
+      fetchProducts();
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('isLoggedIn');
+      location.reload();
+    }
+
+    async function fetchProducts() {
+      try {
+        const response = await fetch('/api/products');
+        const result = await response.json();
+
+        if (result.success && result.data.length > 0) {
+          productsData = result.data;
+          renderProducts(productsData);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+
+    function renderProducts(products) {
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+
+      products.forEach((prod, index) => {
+        const prodId = prod.id_produk || prod.id;
+        const imageUrl = prod.gambar || localImages[index % localImages.length];
+
+        container.innerHTML += `
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card card-product h-100">
+              <div class="img-box">
+                <img src="${imageUrl}" alt="${prod.nama_produk}" class="w-100 h-100" style="object-fit: cover; border-radius: 12px;">
+              </div>
+              <div class="d-flex flex-column justify-content-between h-100">
+                <div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="badge badge-category">${prod.kategori || 'Heels'}</span>
+                    <span class="badge badge-stock">Stok: ${prod.stok ?? 0}</span>
+                  </div>
+                  <div class="product-title">${prod.nama_produk}</div>
+                  <div class="product-desc">${prod.deskripsi || 'Desain elegan dan nyaman.'}</div>
+                </div>
+                <div>
+                  <div class="badge-price">
+                    Rp ${Number(prod.harga).toLocaleString('id-ID')}
+                  </div>
+                  <button class="btn-add-cart" onclick="addToCart(${prodId})">
+                    + Tambah Keranjang
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addToCart(productId) {
+      const product = productsData.find(p => (p.id_produk || p.id) === productId);
+      if (!product) return;
+
+      const existingIndex = cart.findIndex(item => item.id === productId);
+
+      if (existingIndex > -1) {
+        const newQty = cart[existingIndex].qty + 1;
+        if (newQty > product.stok) {
+          showCartAlert(`Jumlah pembelian melebihi stok yang tersedia (${product.stok} unit)!`);
+          return;
+        }
+        cart[existingIndex].qty = newQty;
+      } else {
+        if (product.stok < 1) {
+          showCartAlert(`Stok produk habis!`);
+          return;
+        }
+        cart.push({
+          id: productId,
+          nama: product.nama_produk,
+          harga: Number(product.harga),
+          stok: product.stok,
+          qty: 1
+        });
+      }
+
+      hideCartAlert();
+      updateCartUI();
+    }
+
+    function changeQty(productId, delta) {
+      const cartItem = cart.find(item => item.id === productId);
+      if (!cartItem) return;
+
+      const newQty = cartItem.qty + delta;
+      if (newQty < 1) return;
+      if (newQty > cartItem.stok) {
+        showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
+        return;
+      }
+
+      hideCartAlert();
+      cartItem.qty = newQty;
+      updateCartUI();
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const tableBody = document.getElementById('cartTableBody');
+      const emptyMsg = document.getElementById('emptyCartMsg');
+      const cartBadge = document.getElementById('cartCount');
+      const totalPriceEl = document.getElementById('cartTotalPrice');
+
+      tableBody.innerHTML = '';
+      let total = 0;
+      let totalItemsCount = 0;
+
+      if (cart.length === 0) {
+        emptyMsg.classList.remove('d-none');
+        document.getElementById('shippingFormSection').classList.add('d-none');
+      } else {
+        emptyMsg.classList.add('d-none');
+        document.getElementById('shippingFormSection').classList.remove('d-none');
+
+        cart.forEach(item => {
+          const subtotal = item.harga * item.qty;
+          total += subtotal;
+          totalItemsCount += item.qty;
+
+          tableBody.innerHTML += `
+            <tr>
+              <td>
+                <span class="fw-bold text-dark d-block">${item.nama}</span>
+                <span class="small text-muted">Stok: ${item.stok}</span>
+              </td>
+              <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+              <td>
+                <div class="input-group input-group-sm" style="width: 110px;">
+                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, -1)">-</button>
+                  <input type="number" class="form-control text-center" value="${item.qty}" readonly>
+                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, 1)">+</button>
+                </div>
+              </td>
+              <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${item.id})">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      cartBadge.innerText = totalItemsCount;
+      totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    async function handleCheckout() {
+      const username = localStorage.getItem('isLoggedIn');
+      const name = document.getElementById('recipientName').value.trim();
+      const phone = document.getElementById('recipientPhone').value.trim();
+      const address = document.getElementById('recipientAddress').value.trim();
+      const paymentMethod = document.getElementById('paymentMethod').value;
+
+      if (!name || !phone || !address) {
+        showCartAlert("Harap isi semua data penerima!");
+        return;
+      }
+
+      const totalPrice = cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+
+      // Payload untuk backend
+      const payloadBackend = {
+        id_user: 1,
+        nama_penerima: name,
+        alamat_pengiriman: address,
+        no_telepon: phone,
+        items: cart.map(item => ({
+          id_produk: item.id,
+          jumlah: item.qty,
+          ukuran: '38'
+        }))
+      };
+
+      try {
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadBackend)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          const cartModalEl = document.getElementById('cartModal');
+          const cartModal = bootstrap.Modal.getInstance(cartModalEl);
+          if (cartModal) cartModal.hide();
+
+          // Data untuk rendering struk lokal
+          const orderDataLocal = {
+            order_id: '#' + (result.data ? (result.data.id_pesanan || result.data.id_order) : Date.now()),
+            user: username,
+            penerima: { nama: name, telepon: phone, alamat: address },
+            metode_pembayaran: paymentMethod,
+            items: cart.map(item => ({
+              id_produk: item.id,
+              nama_produk: item.nama,
+              harga: item.harga,
+              qty: item.qty,
+              subtotal: item.harga * item.qty
+            })),
+            total_harga: totalPrice,
+            status: 'Success'
+          };
+
+          renderOrderSuccessDetails(orderDataLocal);
+          cart = [];
+          document.getElementById('recipientName').value = '';
+          document.getElementById('recipientPhone').value = '';
+          document.getElementById('recipientAddress').value = '';
+          updateCartUI();
+
+          await fetchProducts();
+
+          const successModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+          successModal.show();
+        } else {
+          showCartAlert(result.message || "Gagal memproses pesanan.");
+        }
+      } catch (err) {
+        showCartAlert("Terjadi kesalahan jaringan/server saat checkout.");
+      }
+    }
+
+    function renderOrderSuccessDetails(order) {
+      const container = document.getElementById('orderSuccessDetails');
+      let itemsListHtml = '';
+      
+      order.items.forEach(item => {
+        itemsListHtml += `
+          <div class="d-flex justify-content-between small mb-1">
+            <span>${item.nama_produk} x ${item.qty}</span>
+            <span class="fw-bold" style="color: var(--pink-accent);">Rp ${item.subtotal.toLocaleString('id-ID')}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="text-center mb-3">
+          <h5 class="fw-bold mb-1" style="color: var(--pink-accent);">FENN HEELS STORE</h5>
+          <span class="badge badge-pink-soft px-3 py-1 fs-6">Status: ${order.status}</span>
+        </div>
+        <div class="border-bottom pb-2 mb-2">
+          <p class="mb-1 text-muted small">ID Pesanan:</p>
+          <p class="fw-bold text-dark mb-0">${order.order_id}</p>
+        </div>
+        <div class="border-bottom pb-2 mb-2">
+          <p class="mb-1 text-muted small">Data Penerima:</p>
+          <p class="mb-0 fw-bold">${order.penerima.nama} (${order.penerima.telepon})</p>
+          <p class="small text-secondary mb-0">${order.penerima.alamat}</p>
+        </div>
+        <div class="border-bottom pb-2 mb-2">
+          <p class="mb-1 text-muted small">Metode Pembayaran:</p>
+          <span class="badge badge-pink-soft">${order.metode_pembayaran}</span>
+        </div>
+        <div class="border-bottom pb-2 mb-2">
+          <p class="mb-2 text-muted small">Daftar Produk:</p>
+          ${itemsListHtml}
+        </div>
+        <div class="d-flex justify-content-between align-items-center pt-2">
+          <span class="fw-bold">Total Pembayaran:</span>
+          <span class="fs-5 fw-bold" style="color: var(--pink-accent);">Rp ${order.total_harga.toLocaleString('id-ID')}</span>
+        </div>
+      `;
+    }
+
+    function printReceipt() {
+      window.print();
+    }
+
+    function showCartAlert(msg) {
+      const alertBox = document.getElementById('cartValidationAlert');
+      document.getElementById('cartAlertMessage').innerText = '⚠️ ' + msg;
+      alertBox.classList.remove('d-none');
+    }
+
+    function hideCartAlert() {
+      document.getElementById('cartValidationAlert').classList.add('d-none');
+    }
+
+    // Fungsi Mengambil Daftar Pesanan Admin (LENGKAP DATA PENERIMA)
+    async function fetchAdminOrders() {
+      try {
+        const res = await fetch('/api/orders');
+        const result = await res.json();
+
+        const tbody = document.getElementById('adminOrdersTableBody');
+        tbody.innerHTML = '';
+
+        if (result.success && result.data && result.data.length > 0) {
+          result.data.forEach(order => {
+            let badgeColor = 'bg-secondary';
+            if (order.status === 'CONFIRMED') badgeColor = 'bg-primary';
+            if (order.status === 'COMPLETED') badgeColor = 'bg-success';
+            if (order.status === 'CANCELLED') badgeColor = 'bg-danger';
+
+            // Toleransi ID pesanan
+            const orderId = order.id_order || order.id;
+
+            // Format tanggal
+            const orderDate = order.created_at ? new Date(order.created_at).toLocaleString('id-ID') : '-';
+
+            tbody.innerHTML += `
+              <tr>
+                <td class="fw-bold">#${orderId}</td>
+                <td>
+                  <strong class="text-dark">${order.nama_penerima || 'Tanpa Nama'}</strong><br>
+                  <small class="text-muted"><i class="fa-solid fa-phone me-1"></i>${order.no_telepon || '-'}</small><br>
+                  <small class="text-secondary"><i class="fa-solid fa-location-dot me-1"></i>${order.alamat_pengiriman || '-'}</small>
+                </td>
+                <td><small class="text-muted">${orderDate}</small></td>
+                <td class="fw-bold text-danger">Rp ${Number(order.total_harga || 0).toLocaleString('id-ID')}</td>
+                <td><span class="badge ${badgeColor}">${order.status}</span></td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="updateOrderStatus(${orderId}, 'CONFIRMED')">CONFIRM</button>
+                    <button class="btn btn-outline-success" onclick="updateOrderStatus(${orderId}, 'COMPLETED')">COMPLETE</button>
+                    <button class="btn btn-outline-danger" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">CANCEL</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Belum ada pesanan masuk.</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error Admin Orders:', err);
+      }
+    }
+
+    // Fungsi Mengubah Status & Memvalidasi Aturan Transisi Status
+    async function updateOrderStatus(orderId, statusBaru) {
+      const alertBox = document.getElementById('adminAlert');
+      try {
+        const res = await fetch(`/api/orders/${orderId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ statusBaru })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          alertBox.className = 'alert alert-success fw-bold';
+          alertBox.innerText = '✅ ' + result.message;
+        } else {
+          alertBox.className = 'alert alert-danger fw-bold';
+          alertBox.innerText = '❌ ' + result.message;
+        }
+
+        alertBox.classList.remove('d-none');
+        fetchAdminOrders();
+
+      } catch (err) {
+        alertBox.className = 'alert alert-danger fw-bold';
+        alertBox.innerText = '❌ Terjadi kesalahan server.';
+        alertBox.classList.remove('d-none');
+      }
+    }
+  </script>
+</body>
+</html>
