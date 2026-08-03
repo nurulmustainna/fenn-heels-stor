@@ -468,18 +468,30 @@
     }
 
     async function fetchProducts() {
-      try {
-        const response = await fetch('/api/products');
-        const result = await response.json();
+  try {
+    const response = await fetch('/api/products');
+    if (!response.ok) throw new Error('Gagal memuat API');
+    const data = await response.json();
+    productsData = data;
+    renderProducts(data);
+  } catch (error) {
+    console.warn('Menggunakan data fallback/dummy:', error);
+    
+    // TAMBAHKAN / GANTI 7 DATA PRODUK DI BAGIAN INI:
+    const dummyProducts = [
+      { _id: '1', name: 'Crystal White Heels', price: 585000, stock: 500, category: 'Slingback', image: 'images/crystal-white.jpg', description: 'Heels putih elegan dengan aksen crystal.' },
+      { _id: '2', name: 'Ivory Pointed Slingback', price: 425000, stock: 500, category: 'Kitten Heels', image: 'images/ivory-pointed.jpg', description: 'Heels slingback warna ivory minimalis.' },
+      { _id: '3', name: 'Ribbon Luxe Heels', price: 490000, stock: 500, category: 'Luxury Heels', image: 'images/ribbon-luxe.jpg', description: 'High heels premium dengan detail pita classy.' },
+      { _id: '4', name: 'Diamond Strap Heels', price: 475000, stock: 500, category: 'Luxury Heels', image: 'images/diamond-strap.jpg', description: 'Heels mewah dengan strap diamond untuk tampilan formal dan glamor.' },
+      { _id: '5', name: 'Mocha Slingback Heels', price: 340000, stock: 500, category: 'Casual Heels', image: 'images/mocha-slingback.jpg', description: 'Heels warna mocha dengan desain simpel cocok untuk daily outfit.' },
+      { _id: '6', name: 'Classic Nude Pointed Heels', price: 390000, stock: 500, category: 'Slingback', image: 'images/classic-nude.jpg', description: 'Heels nude pointed toe dengan desain timeless dan feminin.' },
+      { _id: '7', name: 'Golden Accent Kitten Heels', price: 410000, stock: 500, category: 'Kitten Heels', image: 'images/golden-accent.jpg', description: 'Kitten heels cream dengan aksen emas elegan dan nyaman dipakai.' }
+    ];
 
-        if (result.success && result.data.length > 0) {
-          productsData = result.data;
-          renderProducts(productsData);
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      }
-    }
+    productsData = dummyProducts;
+    renderProducts(dummyProducts);
+  }
+}
 
     function renderProducts(products) {
       const container = document.getElementById('productList');
