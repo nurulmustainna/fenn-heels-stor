@@ -493,145 +493,166 @@
 }
 
     function renderProducts(products) {
-      const container = document.getElementById('productList');
-      container.innerHTML = '';
+    const container = document.getElementById('productList');
+    if (!container) return;
 
-      products.forEach((prod, index) => {
-        const prodId = prod.id_produk || prod.id;
-        const imageUrl = prod.gambar || localImages[index % localImages.length];
+    container.innerHTML = products.map(product => {
+    // Ambil ID produk dari database/API (cek semua kemungkinan nama kolom)
+    const pId = String(product.id_produk || product._id || product.id || '');
+    const price = Number(product.harga || product.price || 0);
+    const name = product.nama_produk || product.name || product.title || product.nama || 'Produk Heels';
+    const image = product.gambar || product.image || 'images/classic-nude.jpg';
+    const stock = product.stok !== undefined ? product.stok : (product.stock || 0);
+    const desc = product.deskripsi || product.description || 'Desain elegan dan nyaman.';
 
-        container.innerHTML += `
-          <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-            <div class="card card-product h-100">
-              <div class="img-box">
-                <img src="${imageUrl}" alt="${prod.nama_produk}" class="w-100 h-100" style="object-fit: cover; border-radius: 12px;">
+    return `
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm card-product">
+          <div class="img-box">
+            <img src="${image}" class="img-fluid" alt="${name}" onerror="this.src='https://via.placeholder.com/300x200?text=Heels'">
+          </div>
+          <div class="card-body d-flex flex-column justify-content-between p-0">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge badge-category">${product.kategori || product.category || 'Heels'}</span>
+                <span class="badge badge-stock">Stok: ${stock}</span>
               </div>
-              <div class="d-flex flex-column justify-content-between h-100">
-                <div>
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="badge badge-category">${prod.kategori || 'Heels'}</span>
-                    <span class="badge badge-stock">Stok: ${prod.stok ?? 0}</span>
-                  </div>
-                  <div class="product-title">${prod.nama_produk}</div>
-                  <div class="product-desc">${prod.deskripsi || 'Desain elegan dan nyaman.'}</div>
-                </div>
-                <div>
-                  <div class="badge-price">
-                    Rp ${Number(prod.harga).toLocaleString('id-ID')}
-                  </div>
-                  <button class="btn-add-cart" onclick="addToCart(${prodId})">
-                    + Tambah Keranjang
-                  </button>
-                </div>
-              </div>
+              <h5 class="card-title text-dark fs-6 fw-bold mb-1">${name}</h5>
+              <p class="card-text text-muted" style="font-size: 0.85rem;">${desc}</p>
+            </div>
+            <div class="mt-3">
+              <p class="fw-bold text-danger fs-5 mb-2">Rp ${price.toLocaleString('id-ID')}</p>
+              <button class="btn btn-pink w-100 py-2" onclick="addToCart('${pId}')">
+                + Tambah Keranjang
+              </button>
             </div>
           </div>
-        `;
-      });
-    }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
     function addToCart(productId) {
-      const product = productsData.find(p => (p.id_produk || p.id) === productId);
-      if (!product) return;
+  if (!productId) {
+    console.error("ID Produk kosong!");
+    return;
+  }
 
-      const existingIndex = cart.findIndex(item => item.id === productId);
+  // Cari produk berdasarkan ID yang dikirim
+  const product = productsData.find(p => {
+    const pId = String(p.id_produk || p._id || p.id || '');
+    return pId === String(productId);
+  });
 
-      if (existingIndex > -1) {
-        const newQty = cart[existingIndex].qty + 1;
-        if (newQty > product.stok) {
-          showCartAlert(`Jumlah pembelian melebihi stok yang tersedia (${product.stok} unit)!`);
-          return;
-        }
-        cart[existingIndex].qty = newQty;
-      } else {
-        if (product.stok < 1) {
-          showCartAlert(`Stok produk habis!`);
-          return;
-        }
-        cart.push({
-          id: productId,
-          nama: product.nama_produk,
-          harga: Number(product.harga),
-          stok: product.stok,
-          qty: 1
-        });
-      }
+  if (!product) {
+    console.error("Produk tidak ditemukan di productsData:", productId);
+    return;
+  }
 
-      hideCartAlert();
-      updateCartUI();
+  const pId = String(product.id_produk || product._id || product.id);
+  const name = product.nama_produk || product.name || product.title || product.nama;
+  const price = Number(product.harga || product.price || 0);
+  const stock = product.stok !== undefined ? product.stok : (product.stock || 0);
+
+  const existingIndex = cart.findIndex(item => String(item.id) === pId);
+
+  if (existingIndex > -1) {
+    if (cart[existingIndex].qty + 1 > stock) {
+      showCartAlert(`Jumlah melebihi stok tersedia (${stock})!`);
+      return;
     }
+    cart[existingIndex].qty += 1;
+  } else {
+    if (stock < 1) {
+      showCartAlert(`Stok produk habis!`);
+      return;
+    }
+    cart.push({
+      id: pId,
+      nama: name,
+      harga: price,
+      stok: stock,
+      qty: 1
+    });
+  }
 
+  hideCartAlert();
+  updateCartUI();
+}
     function changeQty(productId, delta) {
-      const cartItem = cart.find(item => item.id === productId);
-      if (!cartItem) return;
+  // Samakan pencarian ID menggunakan String()
+  const cartItem = cart.find(item => String(item.id) === String(productId));
+  if (!cartItem) {
+    console.error("Item tidak ditemukan di keranjang:", productId);
+    return;
+  }
 
-      const newQty = cartItem.qty + delta;
-      if (newQty < 1) return;
-      if (newQty > cartItem.stok) {
-        showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
-        return;
-      }
+  const newQty = cartItem.qty + delta;
 
-      hideCartAlert();
-      cartItem.qty = newQty;
-      updateCartUI();
-    }
+  // Cegah jumlah kurang dari 1
+  if (newQty < 1) return;
 
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      updateCartUI();
-    }
+  // Batasi agar tidak melebihi stok
+  if (newQty > cartItem.stok) {
+    showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
+    return;
+  }
 
+  hideCartAlert();
+  cartItem.qty = newQty;
+  updateCartUI();
+}
     function updateCartUI() {
-      const tableBody = document.getElementById('cartTableBody');
-      const emptyMsg = document.getElementById('emptyCartMsg');
-      const cartBadge = document.getElementById('cartCount');
-      const totalPriceEl = document.getElementById('cartTotalPrice');
+  const tableBody = document.getElementById('cartTableBody');
+  const emptyMsg = document.getElementById('emptyCartMsg');
+  const cartBadge = document.getElementById('cartCount');
+  const totalPriceEl = document.getElementById('cartTotalPrice');
 
-      tableBody.innerHTML = '';
-      let total = 0;
-      let totalItemsCount = 0;
+  tableBody.innerHTML = '';
+  let total = 0;
+  let totalItemsCount = 0;
 
-      if (cart.length === 0) {
-        emptyMsg.classList.remove('d-none');
-        document.getElementById('shippingFormSection').classList.add('d-none');
-      } else {
-        emptyMsg.classList.add('d-none');
-        document.getElementById('shippingFormSection').classList.remove('d-none');
+  if (cart.length === 0) {
+    emptyMsg.classList.remove('d-none');
+    document.getElementById('shippingFormSection').classList.add('d-none');
+  } else {
+    emptyMsg.classList.add('d-none');
+    document.getElementById('shippingFormSection').classList.remove('d-none');
 
-        cart.forEach(item => {
-          const subtotal = item.harga * item.qty;
-          total += subtotal;
-          totalItemsCount += item.qty;
+    cart.forEach(item => {
+      const subtotal = item.harga * item.qty;
+      total += subtotal;
+      totalItemsCount += item.qty;
 
-          tableBody.innerHTML += `
-            <tr>
-              <td>
-                <span class="fw-bold text-dark d-block">${item.nama}</span>
-                <span class="small text-muted">Stok: ${item.stok}</span>
-              </td>
-              <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
-              <td>
-                <div class="input-group input-group-sm" style="width: 110px;">
-                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, -1)">-</button>
-                  <input type="number" class="form-control text-center" value="${item.qty}" readonly>
-                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, 1)">+</button>
-                </div>
-              </td>
-              <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${item.id})">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          `;
-        });
-      }
+      tableBody.innerHTML += `
+        <tr>
+          <td>
+            <span class="fw-bold text-dark d-block">${item.nama}</span>
+            <span class="small text-muted">Stok: ${item.stok}</span>
+          </td>
+          <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+          <td>
+            <div class="input-group input-group-sm" style="width: 110px;">
+              <button class="btn btn-outline-secondary" type="button" onclick="changeQty('${item.id}', -1)">-</button>
+              <input type="number" class="form-control text-center" value="${item.qty}" readonly>
+              <button class="btn btn-outline-secondary" type="button" onclick="changeQty('${item.id}', 1)">+</button>
+            </div>
+          </td>
+          <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="removeFromCart('${item.id}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+  }
 
-      cartBadge.innerText = totalItemsCount;
-      totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
-    }
+  cartBadge.innerText = totalItemsCount;
+  totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+}
 
     async function handleCheckout() {
       const username = localStorage.getItem('isLoggedIn');
@@ -649,16 +670,16 @@
 
       // Payload untuk backend
       const payloadBackend = {
-        id_user: 1,
-        nama_penerima: name,
-        alamat_pengiriman: address,
-        no_telepon: phone,
-        items: cart.map(item => ({
-          id_produk: item.id,
-          jumlah: item.qty,
-          ukuran: '38'
-        }))
-      };
+  id_user: 1,
+  nama_penerima: name,
+  alamat_pengiriman: address,
+  no_telepon: phone,
+  items: cart.map(item => ({
+    id_produk: item.id, // WAJIB: Pastikan mengirim item.id
+    jumlah: item.qty,
+    ukuran: '38'
+  }))
+};
 
       try {
         const response = await fetch('/api/orders', {
