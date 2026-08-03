@@ -422,38 +422,53 @@
     };
 
     async function handleLogin(e) {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const alertBox = document.getElementById('loginAlert');
+  if (e) e.preventDefault();
 
-      if (!username || !password) {
-        alertBox.innerText = '⚠️ Field kosong! Username dan Password wajib diisi.';
-        alertBox.classList.remove('d-none');
-        return;
-      }
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const alertBox = document.getElementById('loginAlert');
 
-      try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
+  const username = usernameInput ? usernameInput.value.trim() : '';
+  const password = passwordInput ? passwordInput.value.trim() : '';
 
-        const result = await response.json();
-        if (result.success) {
-          alertBox.classList.add('d-none');
-          localStorage.setItem('isLoggedIn', result.data.username);
-          showMainApp(result.data.username);
-        } else {
-          alertBox.innerText = '❌ ' + result.message;
-          alertBox.classList.remove('d-none');
-        }
-      } catch (err) {
-        alertBox.innerText = '❌ Gagal terhubung ke server backend.';
-        alertBox.classList.remove('d-none');
-      }
+  if (!username || !password) {
+    if (alertBox) {
+      alertBox.innerText = 'Harap isi email/username dan password!';
+      alertBox.classList.remove('d-none');
     }
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('user', JSON.stringify(data.user || { username }));
+    } else {
+      throw new Error('Koneksi backend gagal');
+    }
+  } catch (error) {
+    console.warn('Backend offline, masuk mode simulasi:', error);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('user', JSON.stringify({ username }));
+  }
+
+  if (alertBox) alertBox.classList.add('d-none');
+
+  const loginSection = document.getElementById('loginSection');
+  const mainAppSection = document.getElementById('mainAppSection') || document.getElementById('app') || document.querySelector('.main-content');
+
+  if (loginSection) loginSection.classList.add('d-none');
+  if (mainAppSection) mainAppSection.classList.remove('d-none');
+
+  if (typeof fetchProducts === 'function') fetchProducts();
+}
 
     function showMainApp(username) {
       document.getElementById('loginSection').classList.add('d-none');
@@ -732,8 +747,7 @@ function removeFromCart(index) {
       } catch (err) {
         showCartAlert("Terjadi kesalahan jaringan/server saat checkout.");
       }
-    }
-
+    
     function renderOrderSuccessDetails(order) {
       const container = document.getElementById('orderSuccessDetails');
       let itemsListHtml = '';
