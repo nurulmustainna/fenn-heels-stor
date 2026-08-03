@@ -653,113 +653,33 @@
   cartBadge.innerText = totalItemsCount;
   totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
 }
-  async function handleCheckout(event) {
-  if (event) event.preventDefault();
 
-  const name = document.getElementById('checkoutName')?.value || '';
-  const phone = document.getElementById('checkoutPhone')?.value || '';
-  const address = document.getElementById('checkoutAddress')?.value || '';
-  const paymentMethod = document.getElementById('checkoutPayment')?.value || 'Cash / Tunai';
+    async function handleCheckout() {
+      const username = localStorage.getItem('isLoggedIn');
+      const name = document.getElementById('recipientName').value.trim();
+      const phone = document.getElementById('recipientPhone').value.trim();
+      const address = document.getElementById('recipientAddress').value.trim();
+      const paymentMethod = document.getElementById('paymentMethod').value;
 
-  if (!name || !phone || !address) {
-    showCartAlert("Harap isi semua data pengiriman dengan lengkap!");
-    return;
-  }
+      if (!name || !phone || !address) {
+        showCartAlert("Harap isi semua data penerima!");
+        return;
+      }
 
-  const payloadBackend = {
-    id_user: 1,
-    nama_penerima: name,
-    alamat_pengiriman: address,
-    no_telepon: phone,
-    metode_pembayaran: paymentMethod,
-    items: cart.map(item => ({
-      id_produk: item.id,
-      jumlah: item.qty,
-      ukuran: '38'
-    }))
-  };
+      const totalPrice = cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
 
-  // KODE PERBAIKAN: Langsung proses pesanan tanpa memanggil fetch API ke backend
-  const dummyOrderResponse = {
-    id_order: 'ORD-' + Date.now(),
-    nama_penerima: name,
-    no_telepon: phone,
-    alamat_pengiriman: address,
-    metode_pembayaran: paymentMethod,
-    total_harga: cart.reduce((sum, item) => sum + (item.harga * item.qty), 0),
-    items: [...cart]
-  };
-
-  // Bersihkan pesan alert error jika ada
-  hideCartAlert();
-
-  // Kosongkan keranjang belanja
-  cart = [];
-  updateCartUI();
-
-  // Tutup Modal Keranjang
-  const cartModalEl = document.getElementById('cartModal');
-  if (cartModalEl) {
-    const modalInstance = bootstrap.Modal.getInstance(cartModalEl) || new bootstrap.Modal(cartModalEl);
-    modalInstance.hide();
-  }
-
-  // Tampilkan Detail Pesanan Berhasil
-  if (typeof renderOrderSuccessDetails === 'function') {
-    renderOrderSuccessDetails(dummyOrderResponse);
-  } else {
-    alert(`Pesanan Berhasil Dibuat!\nID Pesanan: ${dummyOrderResponse.id_order}`);
-  }
-}
-  try {
-    // Mencoba kirim ke Backend API
-    const response = await fetch('/api/orders', { // Sesuaikan endpoint API backend kamu jika ada
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadBackend)
-    });
-
-    if (!response.ok) {
-      throw new Error("Backend server tidak merespon/offline");
-    }
-
-    const data = await response.json();
-    processSuccessfulCheckout(data.order || payloadBackend);
-
-  } catch (error) {
-    console.warn("Koneksi API backend gagal, memproses via Simulasi Frontend Client Side:", error);
-    
-    // FALLBACK: Tetap sukseskan pesanan jika server backend offline/di Vercel
-    const dummyOrderResponse = {
-      id_order: 'ORD-' + Date.now(),
-      metode_pembayaran: paymentMethod,
-      total_harga: cart.reduce((sum, item) => sum + (item.harga * item.qty), 0),
-      items: [...cart]
-    };
-
-    processSuccessfulCheckout(dummyOrderResponse);
-  }
-}
-
-// Fungsi pembantu untuk menyelesaikan status checkout & bersihkan keranjang
-function processSuccessfulCheckout(orderData) {
-  cart = []; // Kosongkan keranjang
-  updateCartUI();
-
-  // Tutup Modal Keranjang (Menggunakan Bootstrap Modal API)
-  const cartModalEl = document.getElementById('cartModal');
-  if (cartModalEl) {
-    const modalInstance = bootstrap.Modal.getInstance(cartModalEl) || new bootstrap.Modal(cartModalEl);
-    modalInstance.hide();
-  }
-
-  // Tampilkan Detail / Notifikasi Sukses
-  if (typeof renderOrderSuccessDetails === 'function') {
-    renderOrderSuccessDetails(orderData);
-  } else {
-    alert("Pesanan Berhasil Dibuat! Terima kasih telah berbelanja.");
-  }
-}
+      // Payload untuk backend
+      const payloadBackend = {
+  id_user: 1,
+  nama_penerima: name,
+  alamat_pengiriman: address,
+  no_telepon: phone,
+  items: cart.map(item => ({
+    id_produk: item.id, // WAJIB: Pastikan mengirim item.id
+    jumlah: item.qty,
+    ukuran: '38'
+  }))
+};
 
       try {
         const response = await fetch('/api/orders', {
