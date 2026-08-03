@@ -532,36 +532,34 @@
     }
 
     function addToCart(productId) {
-      const product = productsData.find(p => (p.id_produk || p.id) === productId);
-      if (!product) return;
+  // 1. Cari produk berdasarkan ID dari data produk yang loaded
+  const product = productsData.find(p => p._id === productId || p.id === productId);
+  if (!product) return;
 
-      const existingIndex = cart.findIndex(item => item.id === productId);
+  // 2. Cek apakah produk sudah ada di keranjang
+  const existingItem = cart.find(item => item._id === productId || item.id === productId);
 
-      if (existingIndex > -1) {
-        const newQty = cart[existingIndex].qty + 1;
-        if (newQty > product.stok) {
-          showCartAlert(`Jumlah pembelian melebihi stok yang tersedia (${product.stok} unit)!`);
-          return;
-        }
-        cart[existingIndex].qty = newQty;
-      } else {
-        if (product.stok < 1) {
-          showCartAlert(`Stok produk habis!`);
-          return;
-        }
-        cart.push({
-          id: productId,
-          nama: product.nama_produk,
-          harga: Number(product.harga),
-          stok: product.stok,
-          qty: 1
-        });
-      }
+  if (existingItem) {
+    // Jika sudah ada, tambahkan jumlahnya
+    existingItem.quantity += 1;
+  } else {
+    // Jika belum ada, masukkan objek baru dengan proteksi fallback properti
+    cart.push({
+      _id: product._id || product.id,
+      name: product.name || product.title || 'Nama Produk',
+      title: product.title || product.name || 'Nama Produk',
+      price: product.price || product.harga || 0,
+      harga: product.harga || product.price || 0,
+      image: product.image || 'images/classic-nude.jpg',
+      stock: product.stock || product.stok || 0,
+      stok: product.stok || product.stock || 0,
+      quantity: 1
+    });
+  }
 
-      hideCartAlert();
-      updateCartUI();
-    }
-
+  // 3. Perbarui tampilan keranjang belanja
+  updateCartUI();
+}
     function changeQty(productId, delta) {
       const cartItem = cart.find(item => item.id === productId);
       if (!cartItem) return;
