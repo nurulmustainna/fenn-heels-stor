@@ -422,53 +422,38 @@
     };
 
     async function handleLogin(e) {
-  if (e) e.preventDefault();
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const alertBox = document.getElementById('loginAlert');
 
-  const usernameInput = document.getElementById('username');
-  const passwordInput = document.getElementById('password');
-  const alertBox = document.getElementById('loginAlert');
+      if (!username || !password) {
+        alertBox.innerText = '⚠️ Field kosong! Username dan Password wajib diisi.';
+        alertBox.classList.remove('d-none');
+        return;
+      }
 
-  const username = usernameInput ? usernameInput.value.trim() : '';
-  const password = passwordInput ? passwordInput.value.trim() : '';
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
-  if (!username || !password) {
-    if (alertBox) {
-      alertBox.innerText = 'Harap isi email/username dan password!';
-      alertBox.classList.remove('d-none');
+        const result = await response.json();
+        if (result.success) {
+          alertBox.classList.add('d-none');
+          localStorage.setItem('isLoggedIn', result.data.username);
+          showMainApp(result.data.username);
+        } else {
+          alertBox.innerText = '❌ ' + result.message;
+          alertBox.classList.remove('d-none');
+        }
+      } catch (err) {
+        alertBox.innerText = '❌ Gagal terhubung ke server backend.';
+        alertBox.classList.remove('d-none');
+      }
     }
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user', JSON.stringify(data.user || { username }));
-    } else {
-      throw new Error('Koneksi backend gagal');
-    }
-  } catch (error) {
-    console.warn('Backend offline, masuk mode simulasi:', error);
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('user', JSON.stringify({ username }));
-  }
-
-  if (alertBox) alertBox.classList.add('d-none');
-
-  const loginSection = document.getElementById('loginSection');
-  const mainAppSection = document.getElementById('mainAppSection') || document.getElementById('app') || document.querySelector('.main-content');
-
-  if (loginSection) loginSection.classList.add('d-none');
-  if (mainAppSection) mainAppSection.classList.remove('d-none');
-
-  if (typeof fetchProducts === 'function') fetchProducts();
-}
 
     function showMainApp(username) {
       document.getElementById('loginSection').classList.add('d-none');
@@ -483,30 +468,18 @@
     }
 
     async function fetchProducts() {
-  try {
-    const response = await fetch('/api/products');
-    if (!response.ok) throw new Error('Gagal memuat API');
-    const data = await response.json();
-    productsData = data;
-    renderProducts(data);
-  } catch (error) {
-    console.warn('Menggunakan data fallback/dummy:', error);
-    
-    // TAMBAHKAN / GANTI 7 DATA PRODUK DI BAGIAN INI:
-    const dummyProducts = [
-  { _id: '1', name: 'Crystal White Heels', title: 'Crystal White Heels', price: 585000, harga: 585000, stock: 500, stok: 500, category: 'Slingback', image: 'images/crystal-white.jpg', description: 'Heels putih elegan dengan aksen crystal.' },
-  { _id: '2', name: 'Ivory Pointed Slingback', title: 'Ivory Pointed Slingback', price: 425000, harga: 425000, stock: 500, stok: 500, category: 'Kitten Heels', image: 'images/ivory-pointed.jpg', description: 'Heels slingback warna ivory minimalis.' },
-  { _id: '3', name: 'Ribbon Luxe Heels', title: 'Ribbon Luxe Heels', price: 490000, harga: 490000, stock: 500, stok: 500, category: 'Luxury Heels', image: 'images/ribbon-luxe.jpg', description: 'High heels premium dengan detail pita classy.' },
-  { _id: '4', name: 'Diamond Strap Heels', title: 'Diamond Strap Heels', price: 475000, harga: 475000, stock: 500, stok: 500, category: 'Luxury Heels', image: 'images/diamond-strap.jpg', description: 'Heels mewah dengan strap diamond untuk tampilan formal dan glamor.' },
-  { _id: '5', name: 'Mocha Slingback Heels', title: 'Mocha Slingback Heels', price: 340000, harga: 340000, stock: 500, stok: 500, category: 'Casual Heels', image: 'images/mocha-slingback.jpg', description: 'Heels warna mocha dengan desain simpel cocok untuk daily outfit.' },
-  { _id: '6', name: 'Classic Nude Pointed Heels', title: 'Classic Nude Pointed Heels', price: 390000, harga: 390000, stock: 500, stok: 500, category: 'Slingback', image: 'images/classic-nude.jpg', description: 'Heels nude pointed toe dengan desain timeless dan feminin.' },
-  { _id: '7', name: 'Golden Accent Kitten Heels', title: 'Golden Accent Kitten Heels', price: 410000, harga: 410000, stock: 500, stok: 500, category: 'Kitten Heels', image: 'images/golden-accent.jpg', description: 'Kitten heels cream dengan aksen emas elegan dan nyaman dipakai.' }
-];
+      try {
+        const response = await fetch('/api/products');
+        const result = await response.json();
 
-    productsData = dummyProducts;
-    renderProducts(dummyProducts);
-  }
-}
+        if (result.success && result.data.length > 0) {
+          productsData = result.data;
+          renderProducts(productsData);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
 
     function renderProducts(products) {
       const container = document.getElementById('productList');
@@ -546,159 +519,136 @@
       });
     }
 
-    // FUNGSI TAMBAH KE KERANJANG & UPDATE UI KERANJANG
-function addToCart(productId) {
-  const product = productsData.find(p => String(p._id) === String(productId) || String(p.id) === String(productId));
-  if (!product) return;
+    function addToCart(productId) {
+      const product = productsData.find(p => (p.id_produk || p.id) === productId);
+      if (!product) return;
 
-  const existingItem = cart.find(item => String(item._id) === String(productId) || String(item.id) === String(productId));
+      const existingIndex = cart.findIndex(item => item.id === productId);
 
-  if (existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cart.push({
-      _id: String(product._id || product.id),
-      name: product.name || product.title || product.nama || 'Produk',
-      price: Number(product.price || product.harga || 0),
-      stock: Number(product.stock || product.stok || 0),
-      image: product.image,
-      quantity: 1
-    });
-  }
+      if (existingIndex > -1) {
+        const newQty = cart[existingIndex].qty + 1;
+        if (newQty > product.stok) {
+          showCartAlert(`Jumlah pembelian melebihi stok yang tersedia (${product.stok} unit)!`);
+          return;
+        }
+        cart[existingIndex].qty = newQty;
+      } else {
+        if (product.stok < 1) {
+          showCartAlert(`Stok produk habis!`);
+          return;
+        }
+        cart.push({
+          id: productId,
+          nama: product.nama_produk,
+          harga: Number(product.harga),
+          stok: product.stok,
+          qty: 1
+        });
+      }
 
-  if (typeof updateCartUI === 'function') updateCartUI();
-  alert('Produk berhasil ditambahkan ke keranjang!');
-}
+      hideCartAlert();
+      updateCartUI();
+    }
 
-function updateCartUI() {
-  const cartTableBody = document.getElementById('cartTableBody') || document.querySelector('#cartModal tbody');
-  const cartTotalElement = document.getElementById('cartTotal') || document.getElementById('totalPrice');
-  const cartBadge = document.getElementById('cartBadge') || document.querySelector('.badge-cart');
+    function changeQty(productId, delta) {
+      const cartItem = cart.find(item => item.id === productId);
+      if (!cartItem) return;
 
-  let total = 0;
-  let totalCount = 0;
+      const newQty = cartItem.qty + delta;
+      if (newQty < 1) return;
+      if (newQty > cartItem.stok) {
+        showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
+        return;
+      }
 
-  if (!cart || cart.length === 0) {
-    if (cartTableBody) cartTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-3">Keranjang masih kosong</td></tr>';
-    if (cartTotalElement) cartTotalElement.innerText = 'Rp 0';
-    if (cartBadge) cartBadge.innerText = '0';
-    return;
-  }
+      hideCartAlert();
+      cartItem.qty = newQty;
+      updateCartUI();
+    }
 
-  if (cartTableBody) {
-    cartTableBody.innerHTML = cart.map((item, index) => {
-      const itemPrice = Number(item.price || item.harga || 0);
-      const itemQty = Number(item.quantity || 1);
-      const subtotal = itemPrice * itemQty;
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCartUI();
+    }
 
-      total += subtotal;
-      totalCount += itemQty;
+    function updateCartUI() {
+      const tableBody = document.getElementById('cartTableBody');
+      const emptyMsg = document.getElementById('emptyCartMsg');
+      const cartBadge = document.getElementById('cartCount');
+      const totalPriceEl = document.getElementById('cartTotalPrice');
 
-      return `
-        <tr>
-          <td>
-            <strong>${item.name || item.title || 'Produk'}</strong><br>
-            <small class="text-muted">Stok: ${item.stock || item.stok || 0}</small>
-          </td>
-          <td>Rp ${itemPrice.toLocaleString('id-ID')}</td>
-          <td>
-            <input type="number" value="${itemQty}" min="1" class="form-control form-control-sm" style="width: 65px;" onchange="changeQuantity(${index}, this.value)">
-          </td>
-          <td class="text-danger fw-bold">Rp ${subtotal.toLocaleString('id-ID')}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})">🗑️</button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
+      tableBody.innerHTML = '';
+      let total = 0;
+      let totalItemsCount = 0;
 
-  if (cartTotalElement) cartTotalElement.innerText = `Rp ${total.toLocaleString('id-ID')}`;
-  if (cartBadge) cartBadge.innerText = totalCount;
-}
+      if (cart.length === 0) {
+        emptyMsg.classList.remove('d-none');
+        document.getElementById('shippingFormSection').classList.add('d-none');
+      } else {
+        emptyMsg.classList.add('d-none');
+        document.getElementById('shippingFormSection').classList.remove('d-none');
 
-function changeQuantity(index, newQty) {
-  if (newQty <= 0) return removeFromCart(index);
-  cart[index].quantity = Number(newQty);
-  updateCartUI();
-}
+        cart.forEach(item => {
+          const subtotal = item.harga * item.qty;
+          total += subtotal;
+          totalItemsCount += item.qty;
 
-function removeFromCart(index) {
-  cart.splice(index, 1);
-  updateCartUI();
-}
+          tableBody.innerHTML += `
+            <tr>
+              <td>
+                <span class="fw-bold text-dark d-block">${item.nama}</span>
+                <span class="small text-muted">Stok: ${item.stok}</span>
+              </td>
+              <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+              <td>
+                <div class="input-group input-group-sm" style="width: 110px;">
+                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, -1)">-</button>
+                  <input type="number" class="form-control text-center" value="${item.qty}" readonly>
+                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, 1)">+</button>
+                </div>
+              </td>
+              <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${item.id})">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
 
       cartBadge.innerText = totalItemsCount;
       totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
-    
+    }
 
     async function handleCheckout() {
-  const username = localStorage.getItem('isLoggedIn');
-  const name = document.getElementById('recipientName').value.trim();
-  const phone = document.getElementById('recipientPhone').value.trim();
-  const address = document.getElementById('recipientAddress').value.trim();
-  const paymentMethod = document.getElementById('paymentMethod') ? document.getElementById('paymentMethod').value : 'Cash';
+      const username = localStorage.getItem('isLoggedIn');
+      const name = document.getElementById('recipientName').value.trim();
+      const phone = document.getElementById('recipientPhone').value.trim();
+      const address = document.getElementById('recipientAddress').value.trim();
+      const paymentMethod = document.getElementById('paymentMethod').value;
 
-  if (!name || !phone || !address) {
-    if (typeof showCartAlert === 'function') {
-      showCartAlert("Harap isi semua data penerima!");
-    } else {
-      alert("Harap isi semua data penerima!");
-    }
-    return;
-  }
+      if (!name || !phone || !address) {
+        showCartAlert("Harap isi semua data penerima!");
+        return;
+      }
 
-  // Hitung total harga dengan fallback properti ganda & konversi Angka (Cegah NaN)
-  const totalPrice = cart.reduce((sum, item) => {
-    const price = Number(item.price || item.harga || 0);
-    const qty = Number(item.quantity || item.qty || 1);
-    return sum + (price * qty);
-  }, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
 
-  // Payload untuk backend
-  const payloadBackend = {
-    id_user: 1,
-    nama_penerima: name,
-    alamat_pengiriman: address,
-    no_telepon: phone,
-    items: cart.map(item => ({
-      id_produk: item._id || item.id,
-      jumlah: Number(item.quantity || item.qty || 1),
-      ukuran: '38'
-    }))
-  };
+      // Payload untuk backend
+      const payloadBackend = {
+        id_user: 1,
+        nama_penerima: name,
+        alamat_pengiriman: address,
+        no_telepon: phone,
+        items: cart.map(item => ({
+          id_produk: item.id,
+          jumlah: item.qty,
+          ukuran: '38'
+        }))
+      };
 
-  try {
-    const response = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadBackend)
-    });
-
-    if (!response.ok) throw new Error('Gagal menghubungi server backend');
-
-    const result = await response.json();
-    alert('Pesanan berhasil dibuat!');
-    
-    // Reset Keranjang & Update UI
-    cart = [];
-    if (typeof updateCartUI === 'function') updateCartUI();
-
-  } catch (error) {
-    console.warn('Backend offline, menjalankan simulasi checkout sukses:', error);
-    
-    // SIMULASI SUKSES (Mencegah alert merah server muncul)
-    alert('Pesanan berhasil dibuat!');
-    
-    // Reset Keranjang & Update UI
-    cart = [];
-    if (typeof updateCartUI === 'function') updateCartUI();
-
-    // Sembunyikan alert error jika ada
-    const alertBox = document.getElementById('checkoutErrorAlert');
-    if (alertBox) alertBox.classList.add('d-none');
-  }
-}
       try {
         const response = await fetch('/api/orders', {
           method: 'POST',
@@ -747,7 +697,8 @@ function removeFromCart(index) {
       } catch (err) {
         showCartAlert("Terjadi kesalahan jaringan/server saat checkout.");
       }
-    
+    }
+
     function renderOrderSuccessDetails(order) {
       const container = document.getElementById('orderSuccessDetails');
       let itemsListHtml = '';
