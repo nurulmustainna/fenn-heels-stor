@@ -558,75 +558,57 @@
   }
 
   // 3. Perbarui tampilan keranjang belanja
-  updateCartUI();
+function updateCartUI() {
+  const cartTableBody = document.getElementById('cartTableBody'); // Sesuaikan ID tabel keranjang Anda
+  const cartTotalElement = document.getElementById('cartTotal'); // Sesuaikan ID total harga Anda
+  const cartCountElement = document.getElementById('cartCount');
+
+  if (!cartTableBody) return;
+
+  if (cart.length === 0) {
+    cartTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Keranjang masih kosong</td></tr>';
+    if (cartTotalElement) cartTotalElement.innerText = 'Rp 0';
+    if (cartCountElement) cartCountElement.innerText = '0';
+    return;
+  }
+
+  let total = 0;
+  let totalItems = 0;
+
+  cartTableBody.innerHTML = cart.map((item, index) => {
+    // Memastikan harga & jumlah berupa angka valid
+    const itemPrice = Number(item.price || item.harga || 0);
+    const itemQty = Number(item.quantity || item.qty || 1);
+    const subtotal = itemPrice * itemQty;
+    
+    total += subtotal;
+    totalItems += itemQty;
+
+    // Memastikan nama produk tidak undefined
+    const itemName = item.name || item.title || 'Produk';
+
+    return `
+      <tr>
+        <td>
+          <strong>${itemName}</strong><br>
+          <small class="text-muted">Stok: ${item.stock || item.stok || 0}</small>
+        </td>
+        <td>Rp ${itemPrice.toLocaleString('id-ID')}</td>
+        <td>
+          <input type="number" value="${itemQty}" min="1" class="form-control form-control-sm width-60" onchange="updateQuantity(${index}, this.value)">
+        </td>
+        <td class="text-danger fw-bold">Rp ${subtotal.toLocaleString('id-ID')}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update total harga dan jumlah badge
+  if (cartTotalElement) cartTotalElement.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+  if (cartCountElement) cartCountElement.innerText = totalItems;
 }
-    function changeQty(productId, delta) {
-      const cartItem = cart.find(item => item.id === productId);
-      if (!cartItem) return;
-
-      const newQty = cartItem.qty + delta;
-      if (newQty < 1) return;
-      if (newQty > cartItem.stok) {
-        showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
-        return;
-      }
-
-      hideCartAlert();
-      cartItem.qty = newQty;
-      updateCartUI();
-    }
-
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      updateCartUI();
-    }
-
-    function updateCartUI() {
-      const tableBody = document.getElementById('cartTableBody');
-      const emptyMsg = document.getElementById('emptyCartMsg');
-      const cartBadge = document.getElementById('cartCount');
-      const totalPriceEl = document.getElementById('cartTotalPrice');
-
-      tableBody.innerHTML = '';
-      let total = 0;
-      let totalItemsCount = 0;
-
-      if (cart.length === 0) {
-        emptyMsg.classList.remove('d-none');
-        document.getElementById('shippingFormSection').classList.add('d-none');
-      } else {
-        emptyMsg.classList.add('d-none');
-        document.getElementById('shippingFormSection').classList.remove('d-none');
-
-        cart.forEach(item => {
-          const subtotal = item.harga * item.qty;
-          total += subtotal;
-          totalItemsCount += item.qty;
-
-          tableBody.innerHTML += `
-            <tr>
-              <td>
-                <span class="fw-bold text-dark d-block">${item.nama}</span>
-                <span class="small text-muted">Stok: ${item.stok}</span>
-              </td>
-              <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
-              <td>
-                <div class="input-group input-group-sm" style="width: 110px;">
-                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, -1)">-</button>
-                  <input type="number" class="form-control text-center" value="${item.qty}" readonly>
-                  <button class="btn btn-outline-secondary" onclick="changeQty(${item.id}, 1)">+</button>
-                </div>
-              </td>
-              <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${item.id})">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          `;
-        });
-      }
 
       cartBadge.innerText = totalItemsCount;
       totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
