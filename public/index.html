@@ -201,29 +201,27 @@
 
       <div id="loginAlert" class="alert alert-danger d-none" role="alert"></div>
 
-      function handleLogin(event) {
-  if (event) event.preventDefault();
+      <script>
+  function handleLogin(event) {
+    if (event) event.preventDefault();
 
-  const usernameInput = document.getElementById('loginUsername')?.value || document.getElementById('username')?.value || 'User';
+    const usernameInput = document.getElementById('loginUsername')?.value || document.getElementById('username')?.value || 'User';
 
-  // Simpan status login di LocalStorage
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('username', usernameInput);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('username', usernameInput);
 
-  // Sembunyikan Form Login & Tampilkan Katalog Utama
-  const loginSection = document.getElementById('loginSection') || document.getElementById('loginPage');
-  const mainContent = document.getElementById('mainContent') || document.getElementById('katalogSection') || document.getElementById('dashboard');
+    const loginSection = document.getElementById('loginSection') || document.getElementById('loginPage');
+    const mainContent = document.getElementById('mainContent') || document.getElementById('katalogSection') || document.getElementById('dashboard');
 
-  if (loginSection) loginSection.style.display = 'none';
-  if (mainContent) mainContent.style.display = 'block';
+    if (loginSection) loginSection.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'block';
 
-  // Jika menggunakan navigasi class Bootstrap / d-none
-  document.querySelectorAll('.login-container, #loginModal').forEach(el => el.classList.add('d-none'));
-  document.querySelectorAll('.main-container, #appContent').forEach(el => el.classList.remove('d-none'));
+    document.querySelectorAll('.login-container, #loginModal').forEach(el => el.classList.add('d-none'));
+    document.querySelectorAll('.main-container, #appContent').forEach(el => el.classList.remove('d-none'));
 
-  // Refresh data keranjang/tampilan jika ada
-  if (typeof updateCartUI === 'function') updateCartUI();
-}
+    if (typeof updateCartUI === 'function') updateCartUI();
+  }
+</script>
   <!-- ==================== 2. KATALOG PRODUK & NAVBAR ==================== -->
   <div id="mainAppSection" class="d-none">
     <nav class="navbar navbar-expand-lg sticky-top">
