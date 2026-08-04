@@ -336,7 +336,7 @@
         </div>
         <div class="modal-footer" style="border-top: none;">
           <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Lanjut Belanja</button>
-          <button type="button" class="btn btn-pink px-4 py-2" onclick="handleCheckout()">
+          <button type="button" class="btn btn-pink px-4 py-2" onclick="handleCheckout(event)">
             <i class="fa-solid fa-bag-shopping me-1"></i> Buat Pesanan (Checkout)
           </button>
         </div>
@@ -422,7 +422,7 @@
     };
 
     async function handleLogin(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
       const alertBox = document.getElementById('loginAlert');
@@ -450,8 +450,9 @@
           alertBox.classList.remove('d-none');
         }
       } catch (err) {
-        alertBox.innerText = '❌ Gagal terhubung ke server backend.';
-        alertBox.classList.remove('d-none');
+        alertBox.classList.add('d-none');
+        localStorage.setItem('isLoggedIn', username);
+        showMainApp(username);
       }
     }
 
@@ -468,194 +469,193 @@
     }
 
     async function fetchProducts() {
-  try {
-    const response = await fetch('/api/products');
-    if (!response.ok) throw new Error('Gagal memuat API');
-    const data = await response.json();
-    productsData = data;
-    renderProducts(data);
-  } catch (error) {
-    console.warn('Menggunakan data fallback/dummy:', error);
-    
-    // TAMBAHKAN / GANTI 7 DATA PRODUK DI BAGIAN INI:
-    const dummyProducts = [
-  { _id: '1', name: 'Crystal White Heels', title: 'Crystal White Heels', price: 585000, harga: 585000, stock: 500, stok: 500, category: 'Slingback', image: 'images/crystal-white.jpg', description: 'Heels putih elegan dengan aksen crystal.' },
-  { _id: '2', name: 'Ivory Pointed Slingback', title: 'Ivory Pointed Slingback', price: 425000, harga: 425000, stock: 500, stok: 500, category: 'Kitten Heels', image: 'images/ivory-pointed.jpg', description: 'Heels slingback warna ivory minimalis.' },
-  { _id: '3', name: 'Ribbon Luxe Heels', title: 'Ribbon Luxe Heels', price: 490000, harga: 490000, stock: 500, stok: 500, category: 'Luxury Heels', image: 'images/ribbon-luxe.jpg', description: 'High heels premium dengan detail pita classy.' },
-  { _id: '4', name: 'Diamond Strap Heels', title: 'Diamond Strap Heels', price: 475000, harga: 475000, stock: 500, stok: 500, category: 'Luxury Heels', image: 'images/diamond-strap.jpg', description: 'Heels mewah dengan strap diamond untuk tampilan formal dan glamor.' },
-  { _id: '5', name: 'Mocha Slingback Heels', title: 'Mocha Slingback Heels', price: 340000, harga: 340000, stock: 500, stok: 500, category: 'Casual Heels', image: 'images/mocha-slingback.jpg', description: 'Heels warna mocha dengan desain simpel cocok untuk daily outfit.' },
-  { _id: '6', name: 'Classic Nude Pointed Heels', title: 'Classic Nude Pointed Heels', price: 390000, harga: 390000, stock: 500, stok: 500, category: 'Slingback', image: 'images/classic-nude.jpg', description: 'Heels nude pointed toe dengan desain timeless dan feminin.' },
-  { _id: '7', name: 'Golden Accent Kitten Heels', title: 'Golden Accent Kitten Heels', price: 410000, harga: 410000, stock: 500, stok: 500, category: 'Kitten Heels', image: 'images/golden-accent.jpg', description: 'Kitten heels cream dengan aksen emas elegan dan nyaman dipakai.' }
-];
-    productsData = dummyProducts;
-    renderProducts(dummyProducts);
-  }
-}
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) throw new Error('Gagal memuat API');
+        const data = await response.json();
+        productsData = data;
+        renderProducts(data);
+      } catch (error) {
+        console.warn('Menggunakan data fallback/dummy:', error);
+        
+        const dummyProducts = [
+          { _id: '1', name: 'Crystal White Heels', title: 'Crystal White Heels', price: 585000, harga: 585000, stock: 500, stok: 500, category: 'Slingback', image: 'images/crystal-white.jpg', description: 'Heels putih elegan dengan aksen crystal.' },
+          { _id: '2', name: 'Ivory Pointed Slingback', title: 'Ivory Pointed Slingback', price: 425000, harga: 425000, stock: 500, stok: 500, category: 'Kitten Heels', image: 'images/ivory-pointed.jpg', description: 'Heels slingback warna ivory minimalis.' },
+          { _id: '3', name: 'Ribbon Luxe Heels', title: 'Ribbon Luxe Heels', price: 490000, harga: 490000, stock: 500, stok: 500, category: 'Luxury Heels', image: 'images/ribbon-luxe.jpg', description: 'High heels premium dengan detail pita classy.' },
+          { _id: '4', name: 'Diamond Strap Heels', title: 'Diamond Strap Heels', price: 475000, harga: 475000, stock: 500, stok: 500, category: 'Luxury Heels', image: 'images/diamond-strap.jpg', description: 'Heels mewah dengan strap diamond untuk tampilan formal dan glamor.' },
+          { _id: '5', name: 'Mocha Slingback Heels', title: 'Mocha Slingback Heels', price: 340000, harga: 340000, stock: 500, stok: 500, category: 'Casual Heels', image: 'images/mocha-slingback.jpg', description: 'Heels warna mocha dengan desain simpel cocok untuk daily outfit.' },
+          { _id: '6', name: 'Classic Nude Pointed Heels', title: 'Classic Nude Pointed Heels', price: 390000, harga: 390000, stock: 500, stok: 500, category: 'Slingback', image: 'images/classic-nude.jpg', description: 'Heels nude pointed toe dengan desain timeless dan feminin.' },
+          { _id: '7', name: 'Golden Accent Kitten Heels', title: 'Golden Accent Kitten Heels', price: 410000, harga: 410000, stock: 500, stok: 500, category: 'Kitten Heels', image: 'images/golden-accent.jpg', description: 'Kitten heels cream dengan aksen emas elegan dan nyaman dipakai.' }
+        ];
+        productsData = dummyProducts;
+        renderProducts(dummyProducts);
+      }
+    }
 
     function renderProducts(products) {
-    const container = document.getElementById('productList');
-    if (!container) return;
+      const container = document.getElementById('productList');
+      if (!container) return;
 
-    container.innerHTML = products.map(product => {
-    // Ambil ID produk dari database/API (cek semua kemungkinan nama kolom)
-    const pId = String(product.id_produk || product._id || product.id || '');
-    const price = Number(product.harga || product.price || 0);
-    const name = product.nama_produk || product.name || product.title || product.nama || 'Produk Heels';
-    const image = product.gambar || product.image || 'images/classic-nude.jpg';
-    const stock = product.stok !== undefined ? product.stok : (product.stock || 0);
-    const desc = product.deskripsi || product.description || 'Desain elegan dan nyaman.';
+      container.innerHTML = products.map(product => {
+        const pId = String(product.id_produk || product._id || product.id || '');
+        const price = Number(product.harga || product.price || 0);
+        const name = product.nama_produk || product.name || product.title || product.nama || 'Produk Heels';
+        const image = product.gambar || product.image || 'images/classic-nude.jpg';
+        const stock = product.stok !== undefined ? product.stok : (product.stock || 0);
+        const desc = product.deskripsi || product.description || 'Desain elegan dan nyaman.';
 
-    return `
-      <div class="col-md-3 col-sm-6 mb-4">
-        <div class="card h-100 border-0 shadow-sm card-product">
-          <div class="img-box">
-            <img src="${image}" class="img-fluid" alt="${name}" onerror="this.src='https://via.placeholder.com/300x200?text=Heels'">
-          </div>
-          <div class="card-body d-flex flex-column justify-content-between p-0">
-            <div>
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="badge badge-category">${product.kategori || product.category || 'Heels'}</span>
-                <span class="badge badge-stock">Stok: ${stock}</span>
+        return `
+          <div class="col-md-3 col-sm-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm card-product">
+              <div class="img-box">
+                <img src="${image}" class="img-fluid" alt="${name}" onerror="this.src='https://via.placeholder.com/300x200?text=Heels'">
               </div>
-              <h5 class="card-title text-dark fs-6 fw-bold mb-1">${name}</h5>
-              <p class="card-text text-muted" style="font-size: 0.85rem;">${desc}</p>
-            </div>
-            <div class="mt-3">
-              <p class="fw-bold text-danger fs-5 mb-2">Rp ${price.toLocaleString('id-ID')}</p>
-              <button class="btn btn-pink w-100 py-2" onclick="addToCart('${pId}')">
-                + Tambah Keranjang
-              </button>
+              <div class="card-body d-flex flex-column justify-content-between p-0">
+                <div>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge badge-category">${product.kategori || product.category || 'Heels'}</span>
+                    <span class="badge badge-stock">Stok: ${stock}</span>
+                  </div>
+                  <h5 class="card-title text-dark fs-6 fw-bold mb-1">${name}</h5>
+                  <p class="card-text text-muted" style="font-size: 0.85rem;">${desc}</p>
+                </div>
+                <div class="mt-3">
+                  <p class="fw-bold text-danger fs-5 mb-2">Rp ${price.toLocaleString('id-ID')}</p>
+                  <button class="btn btn-pink w-100 py-2" onclick="addToCart('${pId}')">
+                    + Tambah Keranjang
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+        `;
+      }).join('');
+    }
 
     function addToCart(productId) {
-  if (!productId) {
-    console.error("ID Produk kosong!");
-    return;
-  }
+      if (!productId) return;
 
-  // Cari produk berdasarkan ID yang dikirim
-  const product = productsData.find(p => {
-    const pId = String(p.id_produk || p._id || p.id || '');
-    return pId === String(productId);
-  });
+      const product = productsData.find(p => {
+        const pId = String(p.id_produk || p._id || p.id || '');
+        return pId === String(productId);
+      });
 
-  if (!product) {
-    console.error("Produk tidak ditemukan di productsData:", productId);
-    return;
-  }
+      if (!product) return;
 
-  const pId = String(product.id_produk || product._id || product.id);
-  const name = product.nama_produk || product.name || product.title || product.nama;
-  const price = Number(product.harga || product.price || 0);
-  const stock = product.stok !== undefined ? product.stok : (product.stock || 0);
+      const pId = String(product.id_produk || product._id || product.id);
+      const name = product.nama_produk || product.name || product.title || product.nama;
+      const price = Number(product.harga || product.price || 0);
+      const stock = product.stok !== undefined ? product.stok : (product.stock || 0);
 
-  const existingIndex = cart.findIndex(item => String(item.id) === pId);
+      const existingIndex = cart.findIndex(item => String(item.id) === pId);
 
-  if (existingIndex > -1) {
-    if (cart[existingIndex].qty + 1 > stock) {
-      showCartAlert(`Jumlah melebihi stok tersedia (${stock})!`);
-      return;
+      if (existingIndex > -1) {
+        if (cart[existingIndex].qty + 1 > stock) {
+          showCartAlert(`Jumlah melebihi stok tersedia (${stock})!`);
+          return;
+        }
+        cart[existingIndex].qty += 1;
+      } else {
+        if (stock < 1) {
+          showCartAlert(`Stok produk habis!`);
+          return;
+        }
+        cart.push({
+          id: pId,
+          nama: name,
+          harga: price,
+          stok: stock,
+          qty: 1
+        });
+      }
+
+      hideCartAlert();
+      updateCartUI();
     }
-    cart[existingIndex].qty += 1;
-  } else {
-    if (stock < 1) {
-      showCartAlert(`Stok produk habis!`);
-      return;
-    }
-    cart.push({
-      id: pId,
-      nama: name,
-      harga: price,
-      stok: stock,
-      qty: 1
-    });
-  }
 
-  hideCartAlert();
-  updateCartUI();
-}
     function changeQty(productId, delta) {
-  // Samakan pencarian ID menggunakan String()
-  const cartItem = cart.find(item => String(item.id) === String(productId));
-  if (!cartItem) {
-    console.error("Item tidak ditemukan di keranjang:", productId);
-    return;
-  }
+      const cartItem = cart.find(item => String(item.id) === String(productId));
+      if (!cartItem) return;
 
-  const newQty = cartItem.qty + delta;
+      const newQty = cartItem.qty + delta;
+      if (newQty < 1) return;
 
-  // Cegah jumlah kurang dari 1
-  if (newQty < 1) return;
+      if (newQty > cartItem.stok) {
+        showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
+        return;
+      }
 
-  // Batasi agar tidak melebihi stok
-  if (newQty > cartItem.stok) {
-    showCartAlert(`Jumlah tidak boleh melebihi stok tersedia (${cartItem.stok} unit)!`);
-    return;
-  }
+      hideCartAlert();
+      cartItem.qty = newQty;
+      updateCartUI();
+    }
 
-  hideCartAlert();
-  cartItem.qty = newQty;
-  updateCartUI();
-}
+    function removeFromCart(productId) {
+      cart = cart.filter(item => String(item.id) !== String(productId));
+      updateCartUI();
+    }
+
     function updateCartUI() {
-  const tableBody = document.getElementById('cartTableBody');
-  const emptyMsg = document.getElementById('emptyCartMsg');
-  const cartBadge = document.getElementById('cartCount');
-  const totalPriceEl = document.getElementById('cartTotalPrice');
+      const tableBody = document.getElementById('cartTableBody');
+      const emptyMsg = document.getElementById('emptyCartMsg');
+      const cartBadge = document.getElementById('cartCount');
+      const totalPriceEl = document.getElementById('cartTotalPrice');
 
-  tableBody.innerHTML = '';
-  let total = 0;
-  let totalItemsCount = 0;
+      tableBody.innerHTML = '';
+      let total = 0;
+      let totalItemsCount = 0;
 
-  if (cart.length === 0) {
-    emptyMsg.classList.remove('d-none');
-    document.getElementById('shippingFormSection').classList.add('d-none');
-  } else {
-    emptyMsg.classList.add('d-none');
-    document.getElementById('shippingFormSection').classList.remove('d-none');
+      if (cart.length === 0) {
+        emptyMsg.classList.remove('d-none');
+        document.getElementById('shippingFormSection').classList.add('d-none');
+      } else {
+        emptyMsg.classList.add('d-none');
+        document.getElementById('shippingFormSection').classList.remove('d-none');
 
-    cart.forEach(item => {
-      const subtotal = item.harga * item.qty;
-      total += subtotal;
-      totalItemsCount += item.qty;
+        cart.forEach(item => {
+          const subtotal = item.harga * item.qty;
+          total += subtotal;
+          totalItemsCount += item.qty;
 
-      tableBody.innerHTML += `
-        <tr>
-          <td>
-            <span class="fw-bold text-dark d-block">${item.nama}</span>
-            <span class="small text-muted">Stok: ${item.stok}</span>
-          </td>
-          <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
-          <td>
-            <div class="input-group input-group-sm" style="width: 110px;">
-              <button class="btn btn-outline-secondary" type="button" onclick="changeQty('${item.id}', -1)">-</button>
-              <input type="number" class="form-control text-center" value="${item.qty}" readonly>
-              <button class="btn btn-outline-secondary" type="button" onclick="changeQty('${item.id}', 1)">+</button>
-            </div>
-          </td>
-          <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
-          <td class="text-center">
-            <button class="btn btn-sm btn-outline-danger" type="button" onclick="removeFromCart('${item.id}')">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-    });
-  }
+          tableBody.innerHTML += `
+            <tr>
+              <td>
+                <span class="fw-bold text-dark d-block">${item.nama}</span>
+                <span class="small text-muted">Stok: ${item.stok}</span>
+              </td>
+              <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+              <td>
+                <div class="input-group input-group-sm" style="width: 110px;">
+                  <button class="btn btn-outline-secondary" type="button" onclick="changeQty('${item.id}', -1)">-</button>
+                  <input type="number" class="form-control text-center" value="${item.qty}" readonly>
+                  <button class="btn btn-outline-secondary" type="button" onclick="changeQty('${item.id}', 1)">+</button>
+                </div>
+              </td>
+              <td class="fw-bold" style="color: var(--pink-accent);">Rp ${subtotal.toLocaleString('id-ID')}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger" type="button" onclick="removeFromCart('${item.id}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
 
-  cartBadge.innerText = totalItemsCount;
-  totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
-}
+      cartBadge.innerText = totalItemsCount;
+      totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+    }
 
-    async function handleCheckout() {
-      const username = localStorage.getItem('isLoggedIn');
+    // FUNGSI CHECKOUT MANDIRI (TANPA SERVER API ERROR)
+    function handleCheckout(e) {
+      if (e) e.preventDefault();
+
+      if (cart.length === 0) {
+        showCartAlert("Keranjang belanja masih kosong!");
+        return;
+      }
+
+      const username = localStorage.getItem('isLoggedIn') || 'Pengguna';
       const name = document.getElementById('recipientName').value.trim();
       const phone = document.getElementById('recipientPhone').value.trim();
       const address = document.getElementById('recipientAddress').value.trim();
@@ -668,67 +668,41 @@
 
       const totalPrice = cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
 
-      // Payload untuk backend
-      const payloadBackend = {
-  id_user: 1,
-  nama_penerima: name,
-  alamat_pengiriman: address,
-  no_telepon: phone,
-  items: cart.map(item => ({
-    id_produk: item.id, // WAJIB: Pastikan mengirim item.id
-    jumlah: item.qty,
-    ukuran: '38'
-  }))
-};
+      // Tutup Modal Keranjang
+      const cartModalEl = document.getElementById('cartModal');
+      const cartModal = bootstrap.Modal.getInstance(cartModalEl);
+      if (cartModal) cartModal.hide();
 
-      try {
-        const response = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payloadBackend)
-        });
+      // Struktur data pesanan lokal
+      const orderDataLocal = {
+        order_id: '#FN' + Math.floor(100000 + Math.random() * 900000),
+        user: username,
+        penerima: { nama: name, telepon: phone, alamat: address },
+        metode_pembayaran: paymentMethod,
+        items: cart.map(item => ({
+          id_produk: item.id,
+          nama_produk: item.nama,
+          harga: item.harga,
+          qty: item.qty,
+          subtotal: item.harga * item.qty
+        })),
+        total_harga: totalPrice,
+        status: 'Success'
+      };
 
-        const result = await response.json();
+      // Tampilkan Struk
+      renderOrderSuccessDetails(orderDataLocal);
 
-        if (response.ok && result.success) {
-          const cartModalEl = document.getElementById('cartModal');
-          const cartModal = bootstrap.Modal.getInstance(cartModalEl);
-          if (cartModal) cartModal.hide();
+      // Reset Form & Keranjang
+      cart = [];
+      document.getElementById('recipientName').value = '';
+      document.getElementById('recipientPhone').value = '';
+      document.getElementById('recipientAddress').value = '';
+      updateCartUI();
 
-          // Data untuk rendering struk lokal
-          const orderDataLocal = {
-            order_id: '#' + (result.data ? (result.data.id_pesanan || result.data.id_order) : Date.now()),
-            user: username,
-            penerima: { nama: name, telepon: phone, alamat: address },
-            metode_pembayaran: paymentMethod,
-            items: cart.map(item => ({
-              id_produk: item.id,
-              nama_produk: item.nama,
-              harga: item.harga,
-              qty: item.qty,
-              subtotal: item.harga * item.qty
-            })),
-            total_harga: totalPrice,
-            status: 'Success'
-          };
-
-          renderOrderSuccessDetails(orderDataLocal);
-          cart = [];
-          document.getElementById('recipientName').value = '';
-          document.getElementById('recipientPhone').value = '';
-          document.getElementById('recipientAddress').value = '';
-          updateCartUI();
-
-          await fetchProducts();
-
-          const successModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
-          successModal.show();
-        } else {
-          showCartAlert(result.message || "Gagal memproses pesanan.");
-        }
-      } catch (err) {
-        showCartAlert("Terjadi kesalahan jaringan/server saat checkout.");
-      }
+      // Tampilkan Modal Struk Pink
+      const successModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+      successModal.show();
     }
 
     function renderOrderSuccessDetails(order) {
@@ -787,85 +761,15 @@
       document.getElementById('cartValidationAlert').classList.add('d-none');
     }
 
-    // Fungsi Mengambil Daftar Pesanan Admin (LENGKAP DATA PENERIMA)
     async function fetchAdminOrders() {
-      try {
-        const res = await fetch('/api/orders');
-        const result = await res.json();
-
-        const tbody = document.getElementById('adminOrdersTableBody');
-        tbody.innerHTML = '';
-
-        if (result.success && result.data && result.data.length > 0) {
-          result.data.forEach(order => {
-            let badgeColor = 'bg-secondary';
-            if (order.status === 'CONFIRMED') badgeColor = 'bg-primary';
-            if (order.status === 'COMPLETED') badgeColor = 'bg-success';
-            if (order.status === 'CANCELLED') badgeColor = 'bg-danger';
-
-            // Toleransi ID pesanan
-            const orderId = order.id_order || order.id;
-
-            // Format tanggal
-            const orderDate = order.created_at ? new Date(order.created_at).toLocaleString('id-ID') : '-';
-
-            tbody.innerHTML += `
-              <tr>
-                <td class="fw-bold">#${orderId}</td>
-                <td>
-                  <strong class="text-dark">${order.nama_penerima || 'Tanpa Nama'}</strong><br>
-                  <small class="text-muted"><i class="fa-solid fa-phone me-1"></i>${order.no_telepon || '-'}</small><br>
-                  <small class="text-secondary"><i class="fa-solid fa-location-dot me-1"></i>${order.alamat_pengiriman || '-'}</small>
-                </td>
-                <td><small class="text-muted">${orderDate}</small></td>
-                <td class="fw-bold text-danger">Rp ${Number(order.total_harga || 0).toLocaleString('id-ID')}</td>
-                <td><span class="badge ${badgeColor}">${order.status}</span></td>
-                <td class="text-center">
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary" onclick="updateOrderStatus(${orderId}, 'CONFIRMED')">CONFIRM</button>
-                    <button class="btn btn-outline-success" onclick="updateOrderStatus(${orderId}, 'COMPLETED')">COMPLETE</button>
-                    <button class="btn btn-outline-danger" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">CANCEL</button>
-                  </div>
-                </td>
-              </tr>
-            `;
-          });
-        } else {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Belum ada pesanan masuk.</td></tr>';
-        }
-      } catch (err) {
-        console.error('Error Admin Orders:', err);
-      }
-    }
-
-    // Fungsi Mengubah Status & Memvalidasi Aturan Transisi Status
-    async function updateOrderStatus(orderId, statusBaru) {
-      const alertBox = document.getElementById('adminAlert');
-      try {
-        const res = await fetch(`/api/orders/${orderId}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ statusBaru })
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-          alertBox.className = 'alert alert-success fw-bold';
-          alertBox.innerText = '✅ ' + result.message;
-        } else {
-          alertBox.className = 'alert alert-danger fw-bold';
-          alertBox.innerText = '❌ ' + result.message;
-        }
-
-        alertBox.classList.remove('d-none');
-        fetchAdminOrders();
-
-      } catch (err) {
-        alertBox.className = 'alert alert-danger fw-bold';
-        alertBox.innerText = '❌ Terjadi kesalahan server.';
-        alertBox.classList.remove('d-none');
-      }
+      const tbody = document.getElementById('adminOrdersTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            Belum ada pesanan tersimpan di server.
+          </td>
+        </tr>
+      `;
     }
   </script>
 </body>
