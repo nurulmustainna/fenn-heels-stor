@@ -405,16 +405,7 @@
   <script>
     let productsData = [];
     let cart = []; 
-
-    const localImages = [
-      '/images/classic-nude.jpg',
-      '/images/crystal-white.jpg',
-      '/images/diamond-strap.jpg',
-      '/images/golden-accent.jpg',
-      '/images/ivory-pointed.jpg',
-      '/images/mocha-slingback.jpg',
-      '/images/ribbon-luxe.jpg'
-    ];
+    let allOrdersData = []; // Array penyimpanan riwayat pesanan ke Panel Admin
 
     window.onload = function() {
       const user = localStorage.getItem('isLoggedIn');
@@ -646,7 +637,7 @@
       totalPriceEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
     }
 
-    // FUNGSI CHECKOUT MANDIRI (TANPA SERVER API ERROR)
+    // FUNGSI CHECKOUT DENGAN SIMPAN DATA KE PANEL ADMIN
     function handleCheckout(e) {
       if (e) e.preventDefault();
 
@@ -667,16 +658,14 @@
       }
 
       const totalPrice = cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
-
-      // Tutup Modal Keranjang
-      const cartModalEl = document.getElementById('cartModal');
-      const cartModal = bootstrap.Modal.getInstance(cartModalEl);
-      if (cartModal) cartModal.hide();
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
       // Struktur data pesanan lokal
       const orderDataLocal = {
         order_id: '#FN' + Math.floor(100000 + Math.random() * 900000),
         user: username,
+        tanggal: formattedDate,
         penerima: { nama: name, telepon: phone, alamat: address },
         metode_pembayaran: paymentMethod,
         items: cart.map(item => ({
@@ -687,8 +676,16 @@
           subtotal: item.harga * item.qty
         })),
         total_harga: totalPrice,
-        status: 'Success'
+        status: 'Pending'
       };
+
+      // Simpan ke array pesanan global
+      allOrdersData.unshift(orderDataLocal);
+
+      // Tutup Modal Keranjang
+      const cartModalEl = document.getElementById('cartModal');
+      const cartModal = bootstrap.Modal.getInstance(cartModalEl);
+      if (cartModal) cartModal.hide();
 
       // Tampilkan Struk
       renderOrderSuccessDetails(orderDataLocal);
@@ -761,15 +758,57 @@
       document.getElementById('cartValidationAlert').classList.add('d-none');
     }
 
-    async function fetchAdminOrders() {
+    // FUNGSI TAMPILKAN DATA DI PANEL ADMIN
+    function fetchAdminOrders() {
       const tbody = document.getElementById('adminOrdersTableBody');
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="text-center text-muted py-4">
-            Belum ada pesanan tersimpan di server.
-          </td>
-        </tr>
-      `;
+      if (!tbody) return;
+
+      if (allOrdersData.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Belum ada pesanan tersimpan di server. Silakan lakukan checkout terlebih dahulu.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = allOrdersData.map((order, index) => {
+        let badgeColor = 'bg-warning text-dark';
+        if (order.status === 'Diproses') badgeColor = 'bg-info text-dark';
+        if (order.status === 'Selesai') badgeColor = 'bg-success';
+        if (order.status === 'Dibatalkan') badgeColor = 'bg-danger';
+
+        return `
+          <tr>
+            <td class="fw-bold">${order.order_id}</td>
+            <td>
+              <strong>${order.penerima.nama}</strong> (${order.penerima.telepon})<br>
+              <small class="text-muted">${order.penerima.alamat}</small>
+            </td>
+            <td class="small">${order.tanggal}</td>
+            <td class="fw-bold text-danger">Rp ${order.total_harga.toLocaleString('id-ID')}</td>
+            <td><span class="badge ${badgeColor}">${order.status}</span></td>
+            <td class="text-center">
+              <select class="form-select form-select-sm d-inline-block w-auto" onchange="updateOrderStatus(${index}, this.value)">
+                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Diproses" ${order.status === 'Diproses' ? 'selected' : ''}>Diproses</option>
+                <option value="Selesai" ${order.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                <option value="Dibatalkan" ${order.status === 'Dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // FUNGSI UBAH STATUS PESANAN DI PANEL ADMIN
+    function updateOrderStatus(index, newStatus) {
+      if (allOrdersData[index]) {
+        allOrdersData[index].status = newStatus;
+        fetchAdminOrders();
+      }
     }
   </script>
 </body>
